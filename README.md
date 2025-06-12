@@ -1,4 +1,4 @@
-# Corporate Websites: A New Measure of Voluntary Disclosure
+# Company Websites: A New Measure of Disclosure
 *Romain Boulland, Thomas Bourveau, Matthias Breuer*
 
 <hr>
