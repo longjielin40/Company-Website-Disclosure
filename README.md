@@ -2,8 +2,8 @@
 *Romain Boulland, Thomas Bourveau, Matthias Breuer*
 
 <hr>
-This repository contains the data and code needed to replicate the main findings of Boulland, Bourveau, and Breuer (2021): "Corporate Websites: A New Measure of Voluntary Disclosure" (<a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3816623">SSRN link</a>). 
-The first section details the steps to: i) extract data from the Wayback Machine Application Programming Interface (API) ; and ii) construct the website-based measure of disclosure. The second section provides the code to parse corporate websites' content using a bag-of-word representation. In both sections, the code can be tailored to construct the measure for firms outside the sample studied in Boulland, Bourveau, Breuer (2021). The third section provides the code and data to study the relationship between the website-based measure of disclosure and liquidity for firms in the CRSP-Compustat universe.
+This repository contains the data and code needed to replicate the main findings of Boulland, Bourveau, and Breuer (2025): "Company Websites: A New Measure of Voluntary Disclosure" (<a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3816623">SSRN link</a>). 
+The first section details the steps to: i) extract data from the Wayback Machine Application Programming Interface (API) ; and ii) construct the website-based measure of disclosure. The second section provides the code to parse corporate websites' content using a bag-of-word representation. In both sections, the code can be tailored to construct the measure for firms outside the sample studied in Boulland, Bourveau, Breuer (2025). The third section provides the data to study the relationship between the website-based measure of disclosure and liquidity for firms in the CRSP-Compustat universe.
 
 
 ## Construction of the measure
@@ -20,7 +20,6 @@ Wayback Machine data are extracted by querying the API using the following call 
 In this command, the field **url** should point to the corporate website. To collect the data on a sample of firms, there are several possibilities, among which:
 - the GNU **wget** program which is available as a command line in MacOS, Linux, or Microsoft Windows (PowerShell). The general syntax is **wget api_call**. The command also accepts a list of files as an argument, which allows for batch downloading. See the wget documentation for more details; 
 - the **copy** command in STATA, which allows to copy an URL to a file. The syntax is **copy api_call *outputfile***;
-- a download manager which allows for batch downloading (*Free Download Manager* for instance is a good open-source option).
 
 The resulting file is a JSON file (**[example_wayback.json](construct_measure/example_wayback.json)**). Because Stata does not read native JSON files, it is necessary to translate them into CSV files. This can be done using the **[json_to_csv.py](construct_measure/json_to_csv.py)** parser.
 
@@ -51,19 +50,21 @@ The program **[WaybackScraper.py](website_scraping/WaybackScraper.py)** scrapes 
 
 ## Relationship between the website-based measure of disclosure and firm liquidity (CRSP-Compustat universe)
 
-- **[corporate_website_disclosure.dta](liquidity/corporate_website_disclosure.dta)**: A STATA dataset containing the website-based measure of disclosure at the quarterly level. The dataset contains the following variables:
+- **[public_firm_size.dta](liquidity/public_firm_size.dta)**: A Stata dataset containing the website-based measure of disclosure at the quarterly level. The dataset contains the following variables:
   - `gvkey`: The gvkey identifier of the firm;
-  - `id`: A unique firm identifier in numeric format;
   - `q`: the quarter during which the size of the corporate website was measured;
   - `size_website_q`: the size of the website (in Bytes) that quarter;
-  - `size_mim_text`: the size of the text elements of the website corresponding to the mimetype 'text/html';
-  - `sector_gind`: the four-digit GICS code to which the firm belongs.
+  - `size_mim_*`: the sum of the size of the elements belonging to mimetype '*';
 
-- **[replication_Website_Disclosure.do](liquidity/replication_Website_Disclosure.do)**. A do-file detailing the steps to replicate the main results of the paper.
+- **[public_firm_topics.dta](liquidity/public_firm_topics.dta)**: A Stata dataset containing the share of each topic at the yearly level. The dataset contains the following variables:
+  - `gvkey`: The gvkey identifier of the firm;
+  - `y`: the year during which the topics are measured;
+  - `ir`: the size of the website dedicated to Investor Relation;
+  - `ir`: the size of the website dedicated to Product, Strategy and Processes;
+  - `geo`: the size of the website dedicated to Geography;
+  - `geo`: the size of the website dedicated to Human Resources;
+  - `total`: the size of the website (in Bytes) that can be classified that year;
 
 
 
-To replicate the results, you will need access to the following commercial datasets:
-- **crsp_msf**: daily stock price data from the Center for Research in Security Price (CRSP);
-- **link_table**: the historical gvkey-permno mapping from the CRSP-Compustat Merged Database, maintained by Wharton Research Data Services (WRDS).
 
