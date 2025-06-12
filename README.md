@@ -1,8 +1,3 @@
-<p align="center">
-  <img src="images/unnamed.jpg" width="100%">
-</p>
-
-
 # Company Websites: A New Measure of Disclosure
 *Romain Boulland, Thomas Bourveau, Matthias Breuer*
 
