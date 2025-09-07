@@ -1,33 +1,78 @@
+<p align="center">
+  <img src="Docs/images/archive_banner.jpg" width="70%">
+</p>
+
 # Company Websites: A New Measure of Disclosure
 *Romain Boulland, Thomas Bourveau, Matthias Breuer*
 
-<hr>
-This repository contains the data and code needed to replicate the main findings of Boulland, Bourveau, and Breuer (2025): "Company Websites: A New Measure of Voluntary Disclosure" (<a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3816623">SSRN link</a>). 
-The first section details the steps to: i) extract data from the Wayback Machine Application Programming Interface (API) ; and ii) construct the website-based measure of disclosure. The second section provides the code to parse corporate websites' content using a bag-of-word representation. In both sections, the code can be tailored to construct the measure for firms outside the sample studied in Boulland, Bourveau, Breuer (2025). The third section provides the data to study the relationship between the website-based measure of disclosure and liquidity for firms in the CRSP-Compustat universe.
+This repository contains the data and code to extend the findings of Boulland, Bourveau, and Breuer (2025): "*Company Websites: A New Measure of Disclosure*" (<a href="https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.70007?af=R">Journal of Accounting Research</a>), based on historical website data provided by the <a href="https://web.archive.org/">Wayback Machine</a>.
 
+Data available includes, for the universe of U.S. public firms: i) the main voluntary disclosure measure (*Website Size*); and ii) a content measure, i.e., the fraction of each website that can be attributed to broad topics (*Investor Relations, Product Strategy and Processes, Human Resources, Geography*).
 
-## Construction of the measure
-It contains the following files:
+The code section details how to construct the measure for firms outside the U.S. public firm sample, including large samples of firms (e.g., private firms and international firms), or to extract other topics of interest (e.g., those related to CSR disclosures).
 
-- **[example_wayback.json](construct_measure/example_wayback.json)**: the Wayback machine JSON extract for one firm;
-- **[json_to_csv.py](construct_measure/json_to_csv.py)**: a JSON to CSV converter;
-- **[construct_measure.do](construct_measure/construct_measure.do)**: A do-file detailing the steps to construct the quarterly website-based measure of disclosure (`size_website_q`).
+Finally, in the last section, we detail how to download and parse the full content of company websites using a bag-of-words representation. Due to the time-intensive nature of this task, it should be restricted to smaller sets of firms (e.g., environmental disclosure of Oil & Gas companies, as in Boulland, Bourveau, and Breuer 2025).
 
+We hope these resources will be useful to all researchers interested in exploiting historical archives of company websites.
 
-Wayback Machine data are extracted by querying the API using the following call (**api_call**):
-**http://web.archive.org/cdx/search/cdx?url=www.cecoenviro.com&matchtype=domain&collapse=timestamp:10&matchType=prefix&output=json**. 
+_Note: Researchers interested in replicating the results of our paper—particularly the relationship between our voluntary disclosure measures and liquidity measures for a sample of public and private U.S. firms—should refer to the <a href="https://www.chicagobooth.edu/research/chookaszian/journal-of-accounting-research/online-supplements-and-datasheets">replication package</a>._
 
-In this command, the field **url** should point to the corporate website. To collect the data on a sample of firms, there are several possibilities, among which:
-- the GNU **wget** program which is available as a command line in MacOS, Linux, or Microsoft Windows (PowerShell). The general syntax is **wget api_call**. The command also accepts a list of files as an argument, which allows for batch downloading. See the wget documentation for more details; 
-- the **copy** command in STATA, which allows to copy an URL to a file. The syntax is **copy api_call *outputfile***;
+## Data for the universe of U.S. public firms
+_Data in this section cover the period 2000–2020 for U.S. public firms. They can be easily matched with Compustat using the gvkey identifier. Researchers interested in other topics developed on websites should refer to the code section._
+- **[public_firm_size.dta](Docs/measures/public_firm_size.dta)**: A Stata dataset containing our website-based measure of disclosure at the quarterly level. The dataset contains the following variables:
+  - `gvkey`: the gvkey identifier of the firm;
+  - `q`: the quarter during which the size of the corporate website was measured;
+  - `size_website_q`: the size of the website (in bytes) that quarter;
+  - `size_mim_*`: the sum of the sizes of the elements belonging to mimetype '*' (i.e., plain text, images, videos, or applications).
 
-The resulting file is a JSON file (**[example_wayback.json](construct_measure/example_wayback.json)**). Because Stata does not read native JSON files, it is necessary to translate them into CSV files. This can be done using the **[json_to_csv.py](construct_measure/json_to_csv.py)** parser.
+<p align="center">
+  <img src="Docs/images/fig3_A.jpg" width="50%">
+</p>
 
-Finally, **[construct_measure.do](construct_measure/construct_measure.do)** is a do-file which takes as an input the CSV file and builds the website-based measure of disclosure at the quarterly level.
+- **[public_firm_topics.dta](Docs/measures/public_firm_topics.dta)**: A Stata dataset containing the share of website content by topic at the yearly level. The dataset contains the following variables:
+  - `gvkey`: the gvkey identifier of the firm;
+  - `y`: the year during which the topics are measured;
+  - `ir`: the size of the website dedicated to Investor Relations;
+  - `pm`: the size of the website dedicated to Product, Strategy, and Processes;
+  - `geo`: the size of the website dedicated to Geography;
+  - `hr`: the size of the website dedicated to Human Resources;
+  - `total`: the size of the website (in bytes) that can be classified that year.
+
+<p align="center">
+  <img src="Docs/images/fig5.jpg" width="50%">
+</p>
+
+## Code to construct the website-based measures of disclosure
+_Code in this section can easily be tailored to construct the measures for firms outside the U.S. public firm sample (e.g., private firms and international firms), or to extract other topics of interest (e.g., those related to CSR disclosures). There are two steps to follow: i) download website indexes from the Wayback Machine API; ii) compute the disclosure measures from the raw indexes using either the Stata code or the Python code provided._
+
+### Downloading index data from the Wayback Machine API (link)
+Wayback Machine data are extracted by querying the [Wayback Machine API](https://archive.org/developers/wayback-cdx-server.html) using the following **api_call**.
+
+**http://web.archive.org/cdx/search/cdx?url=www.cecoenviro.com&matchtype=domain&collapse=timestamp:10&matchType=prefix&output=json**
+
+In this command, the field **url** should point to the company website. To collect the data on a large sample of firms, there are several possibilities, among which:
+- the **wget** command, available as a command line in Microsoft Windows (using, e.g., WSL), macOS, or Linux. The general syntax is **wget api_call**. The command also accepts a list of files as an argument, which allows for batch downloading. See the wget documentation for more details; 
+- the **copy** command in Stata, which allows copying a URL to a file. The syntax is **copy api_call *outputfile***.
+
+The resulting file is a JSON file, one for each company (**[Example](Docs/construct_measure/example_wayback.json)**).
+
+_For large samples, researchers may find it useful to use cloud services (e.g., AWS) to run these tasks in parallel. See, for instance, [this script](Docs/construct_measure/download_wayback.sh) for AWS._
+
+### Compute the main disclosure variable (_Website Size_)
+The following code computes the quarterly website-based measure of disclosure.
+- **[A Stata version](Docs/construct_measure/compute_website_size_format.do)**. Because Stata does not natively read JSON files, it is necessary to first translate them into CSV files using the [CSV converter](Docs/construct_measure/json_to_csv.py);
+- **[A Python version](Docs/construct_measure/construct_measure.py)**, which can be executed directly on JSON files.
+
+### Compute website content measures
+By parsing each URL, it is possible to associate broad topics with company websites.
+- **[The Stata version](Docs/construct_measure/compute_website_content.do)** applies to CSV files. The dictionary used is available in [Excel format](Docs/data/keywords_classification.xlsx).
+- **[The Python version](Docs/construct_measure/urlparse_content.py)** applies directly to JSON files. The dictionary used is available as a set of [text files](Docs/data/dic_topics). The resulting JSON files can be converted into a single CSV file using [this code](Docs/construct_measure/dic_to_stata.py).
 
 ## Parsing corporate websites
 
-The program **[WaybackScraper.py](website_scraping/WaybackScraper.py)** scrapes a time-series of archived company webpages stored on the Wayback Machine. It provides a representation of their textual contents using a bag-of-words approach. Please check dependency and customize the **[config.py](website_scraping/config.py)** file before launching the program.
+_This section details how to download and parse the full content of company websites, not just the website indexes. Due to the time-intensive nature of this task, it is best to focus on a small set of firms (e.g., environmental disclosure of Oil & Gas companies, as depicted in the graph below)._
+
+The program **[WaybackScraper.py](website_scraping/WaybackScraper.py)** scrapes archived company webpages stored on the Wayback Machine and provides a representation of their textual content using a bag-of-words representation. Please customize the **[config.py](website_scraping/config.py)** file before launching the program.
 
 **Main Parameters** (**[WaybackScraper.py](website_scraping/WaybackScraper.py)**)
 - ***host***:*str* Host URL for a given company;
@@ -48,23 +93,7 @@ The program **[WaybackScraper.py](website_scraping/WaybackScraper.py)** scrapes 
 - ***parser***: *str, default ‘lxml’* The parser used to parse scraped HTMLs;
 - ***raw***: *bool, default False* Boolean variable indicating whether store the raw HTML text or not.
 
-## Relationship between the website-based measure of disclosure and firm liquidity (CRSP-Compustat universe)
-
-- **[public_firm_size.dta](liquidity/public_firm_size.dta)**: A Stata dataset containing the website-based measure of disclosure at the quarterly level. The dataset contains the following variables:
-  - `gvkey`: The gvkey identifier of the firm;
-  - `q`: the quarter during which the size of the corporate website was measured;
-  - `size_website_q`: the size of the website (in Bytes) that quarter;
-  - `size_mim_*`: the sum of the size of the elements belonging to mimetype '*';
-
-- **[public_firm_topics.dta](liquidity/public_firm_topics.dta)**: A Stata dataset containing the share of each topic at the yearly level. The dataset contains the following variables:
-  - `gvkey`: The gvkey identifier of the firm;
-  - `y`: the year during which the topics are measured;
-  - `ir`: the size of the website dedicated to Investor Relation;
-  - `ir`: the size of the website dedicated to Product, Strategy and Processes;
-  - `geo`: the size of the website dedicated to Geography;
-  - `geo`: the size of the website dedicated to Human Resources;
-  - `total`: the size of the website (in Bytes) that can be classified that year;
-
-
-
+<p align="left">
+  <img src="Docs/images/fig_OA1.jpg" width="70%">
+</p>
 
